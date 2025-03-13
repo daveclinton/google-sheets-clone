@@ -35,12 +35,10 @@ interface SheetState {
   setFilename: (filename: string) => void;
 }
 
-// Constants
 const ROWS: number = 100;
 const COLS: number = 26;
-const INITIAL_VISIBLE_ROWS: number = 30;
+const INITIAL_VISIBLE_ROWS: number = 40;
 
-// Zustand Store
 const useSheetStore = create<SheetState>((set) => {
   const cells: Record<string, Cell> = {};
   for (let row = 0; row < ROWS; row++) {
@@ -168,7 +166,7 @@ const SheetPage: React.FC = (): JSX.Element => {
             key={`cell-${row}-${col}`}
             className={`border-b border-r h-6 relative ${
               selectedCell?.id === cellId
-                ? "outline outline-2 outline-blue-500 z-10"
+                ? " outline-2 outline-blue-500 z-10"
                 : ""
             }`}
             onClick={(): void => handleCellClick(row, col)}
