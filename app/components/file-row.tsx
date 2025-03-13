@@ -1,18 +1,19 @@
-import type { ReactNode } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-
+import Link from "next/link";
 interface FileRowProps {
   icon: "sheets" | "excel" | "docs" | "slides";
+  id: string;
   title: string;
   owner: string;
   date: string;
   shared?: boolean;
   className?: string;
-  actions?: ReactNode;
+  actions?: React.ReactNode;
 }
 
 export function FileRow({
+  id,
   icon,
   title,
   owner,
@@ -79,7 +80,8 @@ export function FileRow({
   };
 
   return (
-    <div
+    <Link
+      href={`/spreadsheets/${id}`}
       className={cn(
         "flex items-center px-4 py-2 border-b last:border-b-0 group hover:bg-gray-50",
         className
@@ -118,6 +120,6 @@ export function FileRow({
         </div>
       </div>
       {actions}
-    </div>
+    </Link>
   );
 }
