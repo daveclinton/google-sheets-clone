@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-
+import React, { useRef, useMemo, useCallback, JSX } from "react";
+import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Share2, Download, Settings, FileSpreadsheet } from "lucide-react";
 
-// Types
 interface Cell {
   id: string;
   row: number;
@@ -22,147 +21,187 @@ interface Comment {
   cellId: string;
   content: string;
   author: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
-interface SheetData {
-  cells: { [key: string]: Cell };
+interface SheetState {
+  cells: Record<string, Cell>;
   comments: Comment[];
+  selectedCell: Cell | null;
+  filename: string;
+  setCellValue: (row: number, col: number, value: string) => void;
+  setSelectedCell: (cell: Cell | null) => void;
+  addComment: (cellId: string, content: string) => void;
+  setFilename: (filename: string) => void;
 }
 
-export default function SheetPage() {
-  const [data, setData] = useState<SheetData>({
-    cells: {},
-    comments: [],
-  });
+// Constants
+const ROWS: number = 100;
+const COLS: number = 26;
+const INITIAL_VISIBLE_ROWS: number = 30;
 
-  const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [commentInput, setCommentInput] = useState("");
-  const [user] = useState("User");
-  const [filename, setFilename] = useState("Untitled spreadsheet");
-  const measureRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const initialData: SheetData = {
-        cells: {},
-        comments: [],
+// Zustand Store
+const useSheetStore = create<SheetState>((set) => {
+  const cells: Record<string, Cell> = {};
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const cellId: string = `${row}-${col}`;
+      cells[cellId] = {
+        id: cellId,
+        row,
+        col,
+        value: "",
+        hasComment: cellId === "0-0",
       };
-      for (let row = 0; row < 20; row++) {
-        for (let col = 0; col < 10; col++) {
-          const cellId = `${row}-${col}`;
-          initialData.cells[cellId] = {
-            id: cellId,
-            row,
-            col,
-            value: "",
-            hasComment: false,
-          };
-        }
-      }
-
-      setData(initialData);
-      setIsLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const getCellId = (row: number, col: number): string => {
-    return `${row}-${col}`;
-  };
-
-  const handleCellClick = (row: number, col: number) => {
-    const cellId = getCellId(row, col);
-    const cell = data.cells[cellId];
-    setSelectedCell(cell);
-  };
-
-  const handleCellChange = (row: number, col: number, value: string) => {
-    const cellId = getCellId(row, col);
-
-    setData((prev) => ({
-      ...prev,
-      cells: {
-        ...prev.cells,
-        [cellId]: {
-          ...prev.cells[cellId],
-          value,
-        },
-      },
-    }));
-  };
-
-  const addComment = () => {
-    if (!selectedCell || !commentInput.trim()) return;
-
-    const newComment: Comment = {
-      id: uuidv4(),
-      cellId: selectedCell.id,
-      content: commentInput,
-      author: user,
-      createdAt: new Date(),
-    };
-
-    setData((prev) => ({
-      ...prev,
-      comments: [...prev.comments, newComment],
-      cells: {
-        ...prev.cells,
-        [selectedCell.id]: {
-          ...prev.cells[selectedCell.id],
-          hasComment: true,
-        },
-      },
-    }));
-
-    setCommentInput("");
-  };
-
-  const getCommentsForCell = (cellId: string): Comment[] => {
-    return data.comments.filter((comment) => comment.cellId === cellId);
-  };
-
-  const deleteComment = (commentId: string) => {
-    setData((prev) => {
-      const newComments = prev.comments.filter(
-        (comment) => comment.id !== commentId
-      );
-      const updatedCells = { ...prev.cells };
-
-      const cellsWithComments = new Set(
-        newComments.map((comment) => comment.cellId)
-      );
-
-      Object.keys(updatedCells).forEach((cellId) => {
-        if (updatedCells[cellId].hasComment && !cellsWithComments.has(cellId)) {
-          updatedCells[cellId] = {
-            ...updatedCells[cellId],
-            hasComment: false,
-          };
-        }
-      });
-
-      return {
-        ...prev,
-        comments: newComments,
-        cells: updatedCells,
-      };
-    });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-xl font-medium">Loading spreadsheet...</div>
-      </div>
-    );
+    }
   }
+
+  return {
+    cells,
+    comments: [
+      {
+        id: uuidv4(),
+        cellId: "0-0",
+        content: "Sample",
+        author: "John",
+        createdAt: "2025-03-13T10:00:00",
+      },
+    ],
+    selectedCell: null,
+    filename: "Untitled spreadsheet",
+    setCellValue: (row: number, col: number, value: string): void =>
+      set((state: SheetState) => ({
+        cells: {
+          ...state.cells,
+          [`${row}-${col}`]: {
+            ...state.cells[`${row}-${col}`],
+            value,
+          },
+        },
+      })),
+    setSelectedCell: (cell: Cell | null): void => set({ selectedCell: cell }),
+    addComment: (cellId: string, content: string): void =>
+      set((state: SheetState) => ({
+        comments: [
+          ...state.comments,
+          {
+            id: uuidv4(),
+            cellId,
+            content,
+            author: "User",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        cells: {
+          ...state.cells,
+          [cellId]: {
+            ...state.cells[cellId],
+            hasComment: true,
+          },
+        },
+      })),
+    setFilename: (filename: string): void => set({ filename }),
+  };
+});
+
+const SheetPage: React.FC = (): JSX.Element => {
+  const {
+    cells,
+    comments,
+    selectedCell,
+    filename,
+    setCellValue,
+    setSelectedCell,
+    addComment,
+    setFilename,
+  }: SheetState = useSheetStore();
+  const [commentInput, setCommentInput] = React.useState<string>("");
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const getCellId = useCallback(
+    (row: number, col: number): string => `${row}-${col}`,
+    []
+  );
+
+  const getCommentsForCell = useCallback(
+    (cellId: string): Comment[] =>
+      comments.filter((comment: Comment) => comment.cellId === cellId),
+    [comments]
+  );
+
+  const handleCellClick = useCallback(
+    (row: number, col: number): void => {
+      const cellId: string = getCellId(row, col);
+      setSelectedCell(cells[cellId]);
+    },
+    [cells, setSelectedCell, getCellId]
+  );
+
+  const handleTitleFocus = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>): void => {
+      e.target.select();
+    },
+    []
+  );
+
+  const visibleGrid: JSX.Element[] = useMemo(() => {
+    const rows: JSX.Element[] = [];
+    for (let row = 0; row < INITIAL_VISIBLE_ROWS; row++) {
+      const cellsRow: JSX.Element[] = [
+        <div
+          key={`row-${row}`}
+          className={`bg-gray-200 border-b border-r w-10 h-6 flex items-center justify-center font-medium sticky left-0 z-10 ${
+            selectedCell?.row === row ? "bg-gray-300" : ""
+          }`}
+        >
+          {row + 1}
+        </div>,
+      ];
+      for (let col = 0; col < COLS; col++) {
+        const cellId: string = getCellId(row, col);
+        const cell: Cell = cells[cellId];
+        const hasComments: boolean = getCommentsForCell(cellId).length > 0;
+        cellsRow.push(
+          <div
+            key={`cell-${row}-${col}`}
+            className={`border-b border-r h-6 relative ${
+              selectedCell?.id === cellId
+                ? "outline outline-2 outline-blue-500 z-10"
+                : ""
+            }`}
+            onClick={(): void => handleCellClick(row, col)}
+          >
+            <input
+              type="text"
+              value={cell.value}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                setCellValue(row, col, e.target.value)
+              }
+              className="w-full h-full px-2 focus:outline-none text-sm"
+            />
+            {hasComments && (
+              <div className="absolute top-0 right-0 w-2 h-2 bg-orange-400"></div>
+            )}
+          </div>
+        );
+      }
+      rows.push(<React.Fragment key={`row-${row}`}>{cellsRow}</React.Fragment>);
+    }
+    return rows;
+  }, [
+    cells,
+    selectedCell,
+    handleCellClick,
+    getCellId,
+    getCommentsForCell,
+    setCellValue,
+  ]);
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Header with filename and user */}
+      {/* Header */}
       <div className="flex items-center justify-between p-2 border-b bg-white">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -178,8 +217,12 @@ export default function SheetPage() {
                 {filename}
               </span>
               <Input
+                ref={inputRef}
                 value={filename}
-                onChange={(e) => setFilename(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                  setFilename(e.target.value)
+                }
+                onFocus={handleTitleFocus}
                 className="text-lg font-medium h-9 focus-visible:ring-1 px-2 py-1"
                 style={{
                   width: `${
@@ -208,8 +251,7 @@ export default function SheetPage() {
             <Settings className="h-4 w-4" />
           </Button>
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/placeholder.svg" alt={user} />
-            <AvatarFallback>{user.charAt(0)}</AvatarFallback>
+            <AvatarFallback>U</AvatarFallback>
           </Avatar>
         </div>
       </div>
@@ -217,162 +259,137 @@ export default function SheetPage() {
       {/* Toolbar */}
       <div className="flex items-center p-1 border-b bg-gray-50">
         <div className="flex items-center gap-1 px-2">
-          <Button variant="ghost" size="sm" className="text-xs">
-            File
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Edit
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            View
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Insert
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Format
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Data
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Tools
-          </Button>
-          <Button variant="ghost" size="sm" className="text-xs">
-            Help
-          </Button>
+          {(
+            [
+              "File",
+              "Edit",
+              "View",
+              "Insert",
+              "Format",
+              "Data",
+              "Tools",
+              "Help",
+            ] as const
+          ).map((item: string) => (
+            <Button key={item} variant="ghost" size="sm" className="text-xs">
+              {item}
+            </Button>
+          ))}
         </div>
       </div>
 
-      <div className="flex flex-grow overflow-hidden">
-        <div className="flex-grow overflow-auto">
-          <div className="grid grid-cols-[40px_repeat(10,minmax(100px,1fr))]">
-            <div className="bg-gray-200 border-b border-r h-10 flex items-center justify-center"></div>
-            {Array(10)
-              .fill(0)
-              .map((_, col) => (
-                <div
-                  key={`col-${col}`}
-                  className="bg-gray-200 border-b border-r h-10 flex items-center justify-center font-medium"
-                >
-                  {String.fromCharCode(65 + col)}
-                </div>
-              ))}
-            {Array(20)
-              .fill(0)
-              .map((_, row) => (
-                <React.Fragment key={`row-${row}`}>
-                  <div className="bg-gray-200 border-b border-r w-10 h-10 flex items-center justify-center font-medium">
-                    {row + 1}
-                  </div>
-                  {Array(10)
-                    .fill(0)
-                    .map((_, col) => {
-                      const cellId = getCellId(row, col);
-                      const cell = data.cells[cellId];
+      {/* Formula bar */}
+      <div className="flex items-center p-1 border-b bg-white">
+        <div className="flex items-center gap-2 px-2 w-full">
+          <div className="min-w-[60px] text-sm font-medium text-gray-500">
+            {selectedCell
+              ? `${String.fromCharCode(65 + selectedCell.col)}${
+                  selectedCell.row + 1
+                }`
+              : ""}
+          </div>
+          <Input
+            value={selectedCell ? cells[selectedCell.id].value : ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+              if (selectedCell?.id) {
+                setCellValue(
+                  selectedCell.row,
+                  selectedCell.col,
+                  e.target.value
+                );
+              }
+            }}
+            className="flex-grow h-8"
+            placeholder="Enter cell content"
+          />
+        </div>
+      </div>
 
-                      return (
-                        <div
-                          key={`cell-${row}-${col}`}
-                          className={`border-b border-r h-10 relative ${
-                            selectedCell?.id === cellId
-                              ? "outline outline-blue-500 z-10"
-                              : ""
-                          }`}
-                          onClick={() => handleCellClick(row, col)}
-                        >
-                          <input
-                            type="text"
-                            value={cell?.value || ""}
-                            onChange={(e) =>
-                              handleCellChange(row, col, e.target.value)
-                            }
-                            className="w-full h-full px-2 focus:outline-none"
-                          />
-                          {cell?.hasComment && (
-                            <div className="absolute top-0 right-0 w-0 h-0 border-t-4 border-r-4 border-t-transparent border-r-red-500"></div>
-                          )}
-                        </div>
-                      );
-                    })}
-                </React.Fragment>
-              ))}
+      {/* Grid and Comments */}
+      <div className="flex flex-grow overflow-hidden">
+        <div className="flex-grow overflow-auto" ref={gridRef}>
+          <div className="grid grid-cols-[40px_repeat(26,minmax(100px,1fr))] overflow-x-auto">
+            <div className="bg-gray-200 border-b border-r h-6 flex items-center justify-center sticky top-0 left-0 z-20"></div>
+            {Array.from({ length: COLS }, (_, col: number) => (
+              <div
+                key={`col-${col}`}
+                className={`bg-gray-200 border-b border-r h-6 flex items-center justify-center font-medium sticky top-0 z-10 ${
+                  selectedCell?.col === col ? "bg-gray-300" : ""
+                }`}
+              >
+                {String.fromCharCode(65 + col)}
+              </div>
+            ))}
+            {visibleGrid}
           </div>
         </div>
 
-        <div
-          className={`w-80 border-l border-gray-300 flex flex-col bg-gray-50 ${
-            selectedCell ? "block" : "hidden sm:block"
-          }`}
-        >
-          <div className="p-4 border-b bg-white">
-            <h2 className="text-lg font-medium">Comments</h2>
-            {selectedCell && (
-              <div className="text-sm text-gray-500">
-                Cell: {String.fromCharCode(65 + selectedCell.col)}
-                {selectedCell.row + 1}
+        {/* Comments Panel */}
+        {selectedCell && getCommentsForCell(selectedCell.id).length > 0 && (
+          <div className="w-80 bg-white border-l shadow-lg flex flex-col h-full">
+            <div className="p-2 bg-gray-50 border-b">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-medium">Comments</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={(): void => setSelectedCell(null)}
+                >
+                  ✕
+                </Button>
               </div>
-            )}
-          </div>
-
-          <div className="flex-grow overflow-auto p-4">
-            {selectedCell ? (
-              getCommentsForCell(selectedCell.id).length > 0 ? (
-                getCommentsForCell(selectedCell.id).map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="mb-4 bg-white p-3 rounded-lg shadow-sm"
-                  >
-                    <div className="flex justify-between">
-                      <div className="font-medium">{comment.author}</div>
+            </div>
+            <div className="flex-grow overflow-y-auto p-2 space-y-3">
+              {getCommentsForCell(selectedCell.id).map((comment: Comment) => (
+                <div key={comment.id} className="border-b pb-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback>{comment.author[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-xs font-medium">
+                        {comment.author}
+                      </div>
                       <div className="text-xs text-gray-500">
                         {new Date(comment.createdAt).toLocaleString()}
                       </div>
                     </div>
-                    <div className="mt-1">{comment.content}</div>
-                    <button
-                      className="text-xs text-red-500 mt-2"
-                      onClick={() => deleteComment(comment.id)}
-                    >
-                      Delete
-                    </button>
                   </div>
-                ))
-              ) : (
-                <div className="text-gray-500 text-center mt-4">
-                  No comments for this cell
+                  <p className="mt-1 text-sm">{comment.content}</p>
                 </div>
-              )
-            ) : (
-              <div className="text-gray-500 text-center mt-4">
-                Select a cell to view comments
-              </div>
-            )}
-          </div>
-
-          {selectedCell && (
-            <div className="p-4 border-t mt-auto">
+              ))}
+            </div>
+            <div className="p-2 border-t">
               <textarea
                 value={commentInput}
-                onChange={(e) => setCommentInput(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>): void =>
+                  setCommentInput(e.target.value)
+                }
                 placeholder="Add a comment..."
-                className="w-full p-2 border rounded-lg mb-2 resize-none"
-                rows={3}
+                className="w-full p-2 border rounded text-sm resize-none"
+                rows={2}
               />
-              <button
-                onClick={addComment}
-                disabled={!commentInput.trim()}
-                className={`px-4 py-2 rounded-lg w-full ${
-                  !commentInput.trim()
-                    ? "bg-gray-300 text-gray-500"
-                    : "bg-blue-500 text-white"
-                }`}
-              >
-                Add Comment
-              </button>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  onClick={(): void => {
+                    if (selectedCell && commentInput.trim()) {
+                      addComment(selectedCell.id, commentInput);
+                      setCommentInput("");
+                    }
+                  }}
+                  disabled={!commentInput.trim()}
+                  className="flex-1 text-sm"
+                >
+                  Comment
+                </Button>
+                <Button variant="outline" className="flex-1 text-sm">
+                  Cancel
+                </Button>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Status bar */}
@@ -380,7 +397,7 @@ export default function SheetPage() {
         <div className="flex items-center gap-4 px-2">
           <div>Sheet 1</div>
           <div>
-            {Object.values(data.cells).filter((cell) => cell.value).length}{" "}
+            {Object.values(cells).filter((cell: Cell) => cell.value).length}{" "}
             cells with data
           </div>
         </div>
@@ -393,4 +410,6 @@ export default function SheetPage() {
       </div>
     </div>
   );
-}
+};
+
+export default SheetPage;
