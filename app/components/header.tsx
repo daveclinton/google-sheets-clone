@@ -31,11 +31,12 @@ const Header: React.FC<HeaderProps> = ({
   const { user, login, logout, generateRandomUser } = useUserStore();
   const { client } = useVeltClient();
 
-  // Auto-login effect - only runs on client side
   useEffect(() => {
-    // Check if we're in the browser and no user exists
     if (typeof window !== "undefined" && !user) {
-      login(generateRandomUser());
+      const storedUser = localStorage.getItem("user-storage");
+      if (!storedUser) {
+        login(generateRandomUser());
+      }
     }
   }, [user, login, generateRandomUser]);
 
