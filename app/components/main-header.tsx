@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import React, { useEffect } from "react";
 import { useUserStore } from "../store";
 import { useVeltClient } from "@veltdev/react";
+import Link from "next/link";
 
 interface MainHeaderProps {
   searchQuery: string;
@@ -53,7 +54,10 @@ const MainHeader: React.FC<MainHeaderProps> = ({
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b shadow-sm">
       <div className="flex items-center gap-2 mr-8">
-        <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center">
+        <Link
+          href="/"
+          className="w-8 h-8 bg-green-600 rounded flex items-center justify-center"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -62,7 +66,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
           >
             <path d="M3 3h18v18H3V3zm16 16V5H5v14h14z" />
           </svg>
-        </div>
+        </Link>
         <span className="text-lg font-medium">Sheets</span>
       </div>
       <div className="flex-1 max-w-3xl">
