@@ -4,7 +4,7 @@ import React, { useRef, useMemo, useCallback, JSX, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Header from "@/app/components/header";
+import Header from "@/app/features/header";
 import { useSheetStore } from "@/app/store";
 import { useParams, useSearchParams } from "next/navigation";
 import {

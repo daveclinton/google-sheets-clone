@@ -11,9 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { sampleFiles } from "@/lib/sheetData";
-import FiltersBar from "./components/filters-bar";
-import FilesSection from "./components/files-section";
-import Header from "./components/header";
+import FiltersBar from "./features/filters-bar";
+import FilesSection from "./features/files-section";
+import Header from "./features/header";
 
 export default function GoogleSheetsUI() {
   const [searchQuery, setSearchQuery] = useState("");
