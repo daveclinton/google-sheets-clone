@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useRef, useMemo, useCallback, JSX } from "react";
+import React, { useRef, useMemo, useCallback, JSX, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Header from "@/app/components/header";
 import { useSheetStore } from "@/app/store";
+import { useSearchParams } from "next/navigation";
 
 interface Cell {
   id: string;
@@ -38,6 +39,9 @@ const COLS: number = 26;
 const INITIAL_VISIBLE_ROWS: number = 40;
 
 const SheetPage: React.FC = (): JSX.Element => {
+  const searchParams = useSearchParams();
+  const urlTitle = searchParams.get("title");
+
   const {
     cells,
     comments,
@@ -48,10 +52,18 @@ const SheetPage: React.FC = (): JSX.Element => {
     addComment,
     setFilename,
   }: SheetState = useSheetStore();
+
   const [commentInput, setCommentInput] = React.useState<string>("");
   const measureRef = useRef<HTMLSpanElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (urlTitle) {
+      setFilename(urlTitle);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlTitle, setFilename]);
 
   const getCellId = useCallback(
     (row: number, col: number): string => `${row}-${col}`,
@@ -137,7 +149,7 @@ const SheetPage: React.FC = (): JSX.Element => {
       <Header
         type="sheets"
         measureRef={measureRef}
-        filename={filename}
+        filename={urlTitle || filename} // Prioritize URL title directly in the Header
         inputRef={inputRef}
         setFilename={setFilename}
         handleTitleFocus={handleTitleFocus}

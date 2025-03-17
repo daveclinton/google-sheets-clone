@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+
 interface FileRowProps {
   icon: "sheets" | "excel" | "docs" | "slides";
   id: string;
@@ -59,7 +60,7 @@ export function FileRow({
             fill={getIconColor()}
             className="w-5 h-5"
           >
-            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
+            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9-2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
           </svg>
         );
       case "slides":
@@ -70,7 +71,7 @@ export function FileRow({
             fill={getIconColor()}
             className="w-5 h-5"
           >
-            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9-2-2zm0 16H5V5h14v14z" />
             <path d="M7 12h10v2H7z" />
           </svg>
         );
@@ -81,7 +82,10 @@ export function FileRow({
 
   return (
     <Link
-      href={`/spreadsheets/${id}`}
+      href={{
+        pathname: `/spreadsheets/${id}`,
+        query: { title },
+      }}
       className={cn(
         "flex items-center px-4 py-2 border-b last:border-b-0 group hover:bg-gray-50",
         className
