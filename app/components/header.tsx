@@ -44,12 +44,11 @@ const Header: React.FC<HeaderProps> = ({
     login(generateRandomUser());
   };
 
-  // Synchronize user with Velt client when either changes
   useEffect(() => {
     if (!client || !user) return;
     const veltUser = {
       userId: user.uid,
-      organizationId: user.organizationId,
+      organizationId: "org-user007",
       name: user.displayName,
       email: user.email,
       photoUrl: user.photoURL,
