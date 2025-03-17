@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useRef, useMemo, useCallback, JSX, useEffect } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Header from "@/app/features/header";
-import { useSheetStore } from "@/app/store";
+import { SheetState, useSheetStore } from "@/app/store";
 import { useParams, useSearchParams } from "next/navigation";
 import {
   VeltCommentTool,
@@ -21,25 +19,6 @@ interface Cell {
   hasComment: boolean;
 }
 
-interface Comment {
-  id: string;
-  cellId: string;
-  content: string;
-  author: string;
-  createdAt: string;
-}
-
-interface SheetState {
-  cells: Record<string, Cell>;
-  comments: Comment[];
-  selectedCell: Cell | null;
-  filename: string;
-  setCellValue: (row: number, col: number, value: string) => void;
-  setSelectedCell: (cell: Cell | null) => void;
-  addComment: (cellId: string, content: string) => void;
-  setFilename: (filename: string) => void;
-}
-
 const COLS: number = 26;
 const INITIAL_VISIBLE_ROWS: number = 40;
 
@@ -50,16 +29,13 @@ const SheetPage: React.FC = (): JSX.Element => {
 
   const {
     cells,
-    comments,
     selectedCell,
     filename,
     setCellValue,
     setSelectedCell,
-    addComment,
     setFilename,
   }: SheetState = useSheetStore();
 
-  const [commentInput, setCommentInput] = React.useState<string>("");
   const measureRef = useRef<HTMLSpanElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -75,12 +51,6 @@ const SheetPage: React.FC = (): JSX.Element => {
   const getCellId = useCallback(
     (row: number, col: number): string => `${row}-${col}`,
     []
-  );
-
-  const getCommentsForCell = useCallback(
-    (cellId: string): Comment[] =>
-      comments.filter((comment: Comment) => comment.cellId === cellId),
-    [comments]
   );
 
   const handleCellClick = useCallback(
@@ -201,72 +171,6 @@ const SheetPage: React.FC = (): JSX.Element => {
             {visibleGrid}
           </div>
         </div>
-
-        {selectedCell && getCommentsForCell(selectedCell.id).length > 0 && (
-          <div className="w-80 bg-white border-l shadow-lg flex flex-col h-full">
-            <div className="p-2 bg-gray-50 border-b">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium">Comments</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={(): void => setSelectedCell(null)}
-                >
-                  ✕
-                </Button>
-              </div>
-            </div>
-            <div className="flex-grow overflow-y-auto p-2 space-y-3">
-              {getCommentsForCell(selectedCell.id).map((comment: Comment) => (
-                <div key={comment.id} className="border-b pb-2">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback>{comment.author[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="text-xs font-medium">
-                        {comment.author}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(comment.createdAt).toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-1 text-sm">{comment.content}</p>
-                </div>
-              ))}
-            </div>
-            <div className="p-2 border-t">
-              <textarea
-                value={commentInput}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>): void =>
-                  setCommentInput(e.target.value)
-                }
-                placeholder="Add a comment..."
-                className="w-full p-2 border rounded text-sm resize-none"
-                rows={2}
-              />
-              <div className="flex gap-2 mt-2">
-                <Button
-                  onClick={(): void => {
-                    if (selectedCell && commentInput.trim()) {
-                      addComment(selectedCell.id, commentInput);
-                      setCommentInput("");
-                    }
-                  }}
-                  disabled={!commentInput.trim()}
-                  className="flex-1 text-sm"
-                >
-                  Comment
-                </Button>
-                <Button variant="outline" className="flex-1 text-sm">
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="flex items-center justify-between p-1 border-t bg-gray-50 text-xs text-gray-500">

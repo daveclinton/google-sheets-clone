@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { v4 as uuidv4 } from "uuid";
 
 export type User = {
   uid: string;
@@ -95,22 +94,12 @@ interface Cell {
   hasComment: boolean;
 }
 
-interface Comment {
-  id: string;
-  cellId: string;
-  content: string;
-  author: string;
-  createdAt: string;
-}
-
-interface SheetState {
+export interface SheetState {
   cells: Record<string, Cell>;
-  comments: Comment[];
   selectedCell: Cell | null;
   filename: string;
   setCellValue: (row: number, col: number, value: string) => void;
   setSelectedCell: (cell: Cell | null) => void;
-  addComment: (cellId: string, content: string) => void;
   setFilename: (filename: string) => void;
 }
 
@@ -134,15 +123,6 @@ export const useSheetStore = create<SheetState>((set) => {
 
   return {
     cells,
-    comments: [
-      {
-        id: uuidv4(),
-        cellId: "0-0",
-        content: "Sample",
-        author: "John",
-        createdAt: "2025-03-13T10:00:00",
-      },
-    ],
     selectedCell: null,
     filename: "Untitled spreadsheet",
     setCellValue: (row: number, col: number, value: string): void =>
@@ -156,26 +136,6 @@ export const useSheetStore = create<SheetState>((set) => {
         },
       })),
     setSelectedCell: (cell: Cell | null): void => set({ selectedCell: cell }),
-    addComment: (cellId: string, content: string): void =>
-      set((state: SheetState) => ({
-        comments: [
-          ...state.comments,
-          {
-            id: uuidv4(),
-            cellId,
-            content,
-            author: "User",
-            createdAt: new Date().toISOString(),
-          },
-        ],
-        cells: {
-          ...state.cells,
-          [cellId]: {
-            ...state.cells[cellId],
-            hasComment: true,
-          },
-        },
-      })),
     setFilename: (filename: string): void => set({ filename }),
   };
 });
