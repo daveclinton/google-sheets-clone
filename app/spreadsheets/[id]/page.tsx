@@ -6,7 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Header from "@/app/components/header";
 import { useSheetStore } from "@/app/store";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import {
+  VeltCommentTool,
+  VeltCommentBubble,
+  useSetDocument,
+} from "@veltdev/react";
 
 interface Cell {
   id: string;
@@ -40,6 +45,7 @@ const INITIAL_VISIBLE_ROWS: number = 40;
 
 const SheetPage: React.FC = (): JSX.Element => {
   const searchParams = useSearchParams();
+  const parmas = useParams();
   const urlTitle = searchParams.get("title");
 
   const {
@@ -64,6 +70,8 @@ const SheetPage: React.FC = (): JSX.Element => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlTitle, setFilename]);
+
+  useSetDocument(parmas?.id as string, { documentName: filename });
 
   const getCellId = useCallback(
     (row: number, col: number): string => `${row}-${col}`,
@@ -107,7 +115,6 @@ const SheetPage: React.FC = (): JSX.Element => {
       for (let col = 0; col < COLS; col++) {
         const cellId: string = getCellId(row, col);
         const cell: Cell = cells[cellId];
-        const hasComments: boolean = getCommentsForCell(cellId).length > 0;
         cellsRow.push(
           <div
             key={`cell-${row}-${col}`}
@@ -117,6 +124,8 @@ const SheetPage: React.FC = (): JSX.Element => {
                 : ""
             }`}
             onClick={(): void => handleCellClick(row, col)}
+            id={`cell-${cellId}`}
+            data-velt-target-comment-element-id={`cell-${cellId}`}
           >
             <input
               type="text"
@@ -126,9 +135,11 @@ const SheetPage: React.FC = (): JSX.Element => {
               }
               className="w-full h-full px-2 focus:outline-none text-sm"
             />
-            {hasComments && (
-              <div className="absolute top-0 right-0 w-2 h-2 bg-orange-400"></div>
-            )}
+
+            <VeltCommentBubble
+              targetElementId={`cell-${cellId}`}
+              className="absolute top-0 right-0 w-2 h-2"
+            />
           </div>
         );
       }
@@ -149,7 +160,7 @@ const SheetPage: React.FC = (): JSX.Element => {
       <Header
         type="sheets"
         measureRef={measureRef}
-        filename={urlTitle || filename} // Prioritize URL title directly in the Header
+        filename={urlTitle || filename}
         inputRef={inputRef}
         setFilename={setFilename}
         handleTitleFocus={handleTitleFocus}
@@ -178,6 +189,7 @@ const SheetPage: React.FC = (): JSX.Element => {
             className="flex-grow h-8"
             placeholder="Enter cell content"
           />
+          <VeltCommentTool />
         </div>
       </div>
 

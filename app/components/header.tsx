@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useUserStore } from "@/app/store";
 import { useVeltClient } from "@veltdev/react";
+
 import Link from "next/link";
 import React, { Ref, useEffect } from "react";
 
@@ -47,7 +48,6 @@ const Header: React.FC<HeaderProps> = ({
   // Synchronize user with Velt client when either changes
   useEffect(() => {
     if (!client || !user) return;
-
     const veltUser = {
       userId: user.uid,
       organizationId: user.organizationId,
