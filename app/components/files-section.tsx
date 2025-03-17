@@ -139,7 +139,7 @@ const FilesSection: React.FC<FileSectionProps> = ({
                   <div className="flex items-center">
                     <Avatar className="h-5 w-5 mr-2">
                       <AvatarFallback className="text-[10px] bg-blue-100 text-blue-800">
-                        {file.owner[0]?.toUpperCase() || "U"}
+                        {file.owner[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-xs text-gray-500">{file.owner}</span>

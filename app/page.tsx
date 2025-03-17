@@ -11,9 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { sampleFiles } from "@/lib/sheetData";
-import MainHeader from "./components/main-header";
 import FiltersBar from "./components/filters-bar";
 import FilesSection from "./components/files-section";
+import Header from "./components/header";
 
 export default function GoogleSheetsUI() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,7 +100,11 @@ export default function GoogleSheetsUI() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <MainHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <Header
+        type="main"
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
       <div className="fixed bottom-8 right-8 z-10">
         <Button className="rounded-full h-14 w-14 shadow-lg bg-white hover:bg-gray-100 border border-gray-200">
           <Plus className="h-6 w-6 text-green-600" />

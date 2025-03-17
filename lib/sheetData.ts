@@ -105,8 +105,8 @@ export function deleteComment(commentId: string): boolean {
 export const sampleFiles = [
   {
     id: "ef414092-41e4-4215-b1b5-d5702fc17fc8",
-    title: "Untitled spreadsheet",
-    owner: "me",
+    title: "Intergalactic Trade Routes",
+    owner: "Captain Xandar",
     date: "2025-03-13 19:57:00",
     shared: false,
     starred: false,
@@ -114,7 +114,7 @@ export const sampleFiles = [
   },
   {
     id: "979b9a3a-7138-4438-b32e-4862e814d948",
-    title: "To-do list",
+    title: "Bucket List - Extreme Edition",
     owner: "me",
     date: "2025-03-07",
     shared: true,
@@ -123,8 +123,8 @@ export const sampleFiles = [
   },
   {
     id: "bd76a610-edc6-4f64-9bc7-6234b0be37f2",
-    title: "Kenyan Indie Maker Community top talent",
-    owner: "Peter Okwara",
+    title: "Underground Pizza Spots",
+    owner: "Lisa D.",
     date: "2025-02-09",
     shared: true,
     starred: false,
@@ -132,8 +132,8 @@ export const sampleFiles = [
   },
   {
     id: "f3c67641-aee2-4b5e-b89a-84e2fcd4ca9c",
-    title: "Case Numbers in each 1000 for all consulates",
-    owner: "--",
+    title: "Conspiracy Theories with 99% Proof",
+    owner: "Anonymous",
     date: "2025-02-04",
     shared: true,
     starred: false,
@@ -141,7 +141,7 @@ export const sampleFiles = [
   },
   {
     id: "f5b09111-93bb-4b2d-9d8a-309acdb034c8",
-    title: "Injured & deceased protestors",
+    title: "Top Secret Alien Sightings Log",
     owner: "--",
     date: "2024-06-26",
     shared: true,
@@ -150,8 +150,8 @@ export const sampleFiles = [
   },
   {
     id: "bc95c8aa-7087-4030-97ff-aa7f04a3234e",
-    title: "Finance Bill 2024 Voting",
-    owner: "--",
+    title: "Fastest Ways to Get Rich (Legally?)",
+    owner: "Mysterious Millionaire",
     date: "2024-06-20",
     shared: true,
     starred: false,
@@ -159,7 +159,7 @@ export const sampleFiles = [
   },
   {
     id: "79c3d8c1-a041-4e77-a6a2-cdf3b1328e1f",
-    title: "Remote/Frontend Jobs",
+    title: "Fantasy Football Cheat Sheet 2024",
     owner: "Vishal Rajput",
     date: "2023-10-04",
     shared: true,
@@ -168,7 +168,7 @@ export const sampleFiles = [
   },
   {
     id: "57b779fe-7382-4ff7-836d-020fae0fff06",
-    title: "Event Registration (Responses)",
+    title: "Best Excuses for Calling in Sick",
     owner: "me",
     date: "2023-04-17",
     shared: false,

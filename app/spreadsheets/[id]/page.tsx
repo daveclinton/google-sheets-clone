@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useRef, useMemo, useCallback, JSX } from "react";
-import { create } from "zustand";
-import { v4 as uuidv4 } from "uuid";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import SheetsHeader from "../_components/SheetsHeader";
+import Header from "@/app/components/header";
+import { useSheetStore } from "@/app/store";
 
 interface Cell {
   id: string;
@@ -35,72 +34,8 @@ interface SheetState {
   setFilename: (filename: string) => void;
 }
 
-const ROWS: number = 100;
 const COLS: number = 26;
 const INITIAL_VISIBLE_ROWS: number = 40;
-
-const useSheetStore = create<SheetState>((set) => {
-  const cells: Record<string, Cell> = {};
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      const cellId: string = `${row}-${col}`;
-      cells[cellId] = {
-        id: cellId,
-        row,
-        col,
-        value: "",
-        hasComment: cellId === "0-0",
-      };
-    }
-  }
-
-  return {
-    cells,
-    comments: [
-      {
-        id: uuidv4(),
-        cellId: "0-0",
-        content: "Sample",
-        author: "John",
-        createdAt: "2025-03-13T10:00:00",
-      },
-    ],
-    selectedCell: null,
-    filename: "Untitled spreadsheet",
-    setCellValue: (row: number, col: number, value: string): void =>
-      set((state: SheetState) => ({
-        cells: {
-          ...state.cells,
-          [`${row}-${col}`]: {
-            ...state.cells[`${row}-${col}`],
-            value,
-          },
-        },
-      })),
-    setSelectedCell: (cell: Cell | null): void => set({ selectedCell: cell }),
-    addComment: (cellId: string, content: string): void =>
-      set((state: SheetState) => ({
-        comments: [
-          ...state.comments,
-          {
-            id: uuidv4(),
-            cellId,
-            content,
-            author: "User",
-            createdAt: new Date().toISOString(),
-          },
-        ],
-        cells: {
-          ...state.cells,
-          [cellId]: {
-            ...state.cells[cellId],
-            hasComment: true,
-          },
-        },
-      })),
-    setFilename: (filename: string): void => set({ filename }),
-  };
-});
 
 const SheetPage: React.FC = (): JSX.Element => {
   const {
@@ -199,7 +134,8 @@ const SheetPage: React.FC = (): JSX.Element => {
 
   return (
     <div className="flex flex-col h-screen">
-      <SheetsHeader
+      <Header
+        type="sheets"
         measureRef={measureRef}
         filename={filename}
         inputRef={inputRef}
@@ -207,7 +143,6 @@ const SheetPage: React.FC = (): JSX.Element => {
         handleTitleFocus={handleTitleFocus}
       />
 
-      {/* Formula bar */}
       <div className="flex items-center p-1 border-b bg-white">
         <div className="flex items-center gap-2 px-2 w-full">
           <div className="min-w-[60px] text-sm font-medium text-gray-500">
@@ -234,7 +169,6 @@ const SheetPage: React.FC = (): JSX.Element => {
         </div>
       </div>
 
-      {/* Grid and Comments */}
       <div className="flex flex-grow overflow-hidden">
         <div className="flex-grow overflow-auto" ref={gridRef}>
           <div className="grid grid-cols-[40px_repeat(26,minmax(100px,1fr))] overflow-x-auto">
@@ -253,7 +187,6 @@ const SheetPage: React.FC = (): JSX.Element => {
           </div>
         </div>
 
-        {/* Comments Panel */}
         {selectedCell && getCommentsForCell(selectedCell.id).length > 0 && (
           <div className="w-80 bg-white border-l shadow-lg flex flex-col h-full">
             <div className="p-2 bg-gray-50 border-b">
@@ -321,7 +254,6 @@ const SheetPage: React.FC = (): JSX.Element => {
         )}
       </div>
 
-      {/* Status bar */}
       <div className="flex items-center justify-between p-1 border-t bg-gray-50 text-xs text-gray-500">
         <div className="flex items-center gap-4 px-2">
           <div>Sheet 1</div>
