@@ -68,7 +68,6 @@ const SheetPage: React.FC = (): JSX.Element => {
     if (urlTitle) {
       setFilename(urlTitle);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlTitle, setFilename]);
 
   useSetDocument(parmas?.id as string, { documentName: filename });
@@ -135,7 +134,6 @@ const SheetPage: React.FC = (): JSX.Element => {
               }
               className="w-full h-full px-2 focus:outline-none text-sm"
             />
-
             <VeltCommentBubble
               targetElementId={`cell-${cellId}`}
               className="absolute top-0 right-0 w-2 h-2"
@@ -146,14 +144,7 @@ const SheetPage: React.FC = (): JSX.Element => {
       rows.push(<React.Fragment key={`row-${row}`}>{cellsRow}</React.Fragment>);
     }
     return rows;
-  }, [
-    cells,
-    selectedCell,
-    handleCellClick,
-    getCellId,
-    getCommentsForCell,
-    setCellValue,
-  ]);
+  }, [cells, selectedCell, handleCellClick, getCellId, setCellValue]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -186,7 +177,7 @@ const SheetPage: React.FC = (): JSX.Element => {
                 );
               }
             }}
-            className="flex-grow h-8"
+            className="flex-grow h-8 "
             placeholder="Enter cell content"
           />
           <VeltCommentTool />

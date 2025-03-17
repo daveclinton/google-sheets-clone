@@ -1,9 +1,8 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useUserStore } from "@/app/store";
-import { useVeltClient } from "@veltdev/react";
+import { useVeltClient, VeltPresence } from "@veltdev/react";
 
 import Link from "next/link";
 import React, { Ref, useEffect } from "react";
@@ -134,6 +133,7 @@ const Header: React.FC<HeaderProps> = ({
       )}
 
       <div className="flex items-center ml-4 gap-4">
+        <VeltPresence />
         {user ? (
           <>
             <span className="text-gray-700 font-medium">
@@ -156,21 +156,6 @@ const Header: React.FC<HeaderProps> = ({
             Login
           </Button>
         )}
-
-        <Button
-          variant="ghost"
-          className="p-0 h-9 w-9 rounded-full overflow-hidden border-2 border-transparent hover:border-gray-200"
-        >
-          <Avatar className="h-full w-full">
-            <AvatarImage
-              src={user?.photoURL}
-              alt={user?.displayName || "User"}
-            />
-            <AvatarFallback className="bg-blue-200 text-blue-800">
-              {user?.displayName?.[0] || "U"}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
       </div>
     </header>
   );
