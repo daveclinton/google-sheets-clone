@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Share2, Download, Settings, FileSpreadsheet } from "lucide-react";
+import SheetsHeader from "../_components/SheetsHeader";
 
 interface Cell {
   id: string;
@@ -199,82 +199,13 @@ const SheetPage: React.FC = (): JSX.Element => {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between p-2 border-b bg-white">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-emerald-100">
-              <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div className="relative">
-              <span
-                ref={measureRef}
-                className="invisible absolute whitespace-pre"
-                style={{ fontWeight: 500, fontSize: "1.125rem" }}
-              >
-                {filename}
-              </span>
-              <Input
-                ref={inputRef}
-                value={filename}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
-                  setFilename(e.target.value)
-                }
-                onFocus={handleTitleFocus}
-                className="text-lg font-medium h-9 focus-visible:ring-1 px-2 py-1"
-                style={{
-                  width: `${
-                    Math.max(measureRef.current?.offsetWidth || 0, 120) + 24
-                  }px`,
-                  minWidth: "20px",
-                  maxWidth: "400px",
-                }}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-1 text-sm text-gray-500">
-            <span>All changes saved</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1">
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          <Button variant="outline" size="icon">
-            <Settings className="h-4 w-4" />
-          </Button>
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-        </div>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex items-center p-1 border-b bg-gray-50">
-        <div className="flex items-center gap-1 px-2">
-          {(
-            [
-              "File",
-              "Edit",
-              "View",
-              "Insert",
-              "Format",
-              "Data",
-              "Tools",
-              "Help",
-            ] as const
-          ).map((item: string) => (
-            <Button key={item} variant="ghost" size="sm" className="text-xs">
-              {item}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <SheetsHeader
+        measureRef={measureRef}
+        filename={filename}
+        inputRef={inputRef}
+        setFilename={setFilename}
+        handleTitleFocus={handleTitleFocus}
+      />
 
       {/* Formula bar */}
       <div className="flex items-center p-1 border-b bg-white">
