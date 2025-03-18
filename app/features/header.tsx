@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useUserStore } from "@/app/store";
+
 import { useVeltClient, VeltPresence } from "@veltdev/react";
 
 import Link from "next/link";
 import React, { Ref, useEffect } from "react";
+import { useUserStore } from "@/store/user-store";
 
 interface HeaderProps {
   type: "main" | "sheets";
