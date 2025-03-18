@@ -42,7 +42,7 @@ const createEmptyCell = (): Cell => {
   };
 };
 
-export function makeEmptyData(rows: number, cols: number) {
+function makeEmptyData(rows: number, cols: number) {
   return range(rows).map(() => {
     const rowData: Record<string, Cell> = {};
     for (let i = 0; i < cols; i++) {
