@@ -14,6 +14,7 @@ import {
 import { useParams, useSearchParams } from "next/navigation";
 import Header from "@/app/features/header";
 import {
+  VeltComments,
   VeltCommentTool,
   VeltCommentBubble,
   useSetDocument,
@@ -86,6 +87,9 @@ function EditableCell<TData extends Record<string, Cell>>({
   const initialValue = (getValue() as Cell)?.value || "";
   const [value, setValue] = React.useState(initialValue);
 
+  // Create unique cell ID for targeting with Velt comments
+  const cellId = `cell-${row.index}-${column.id}`;
+
   const onBlur = () => {
     table.options.meta?.updateData(row.index, column.id, { value });
   };
@@ -95,12 +99,18 @@ function EditableCell<TData extends Record<string, Cell>>({
   }, [initialValue]);
 
   return (
-    <input
-      value={value as string}
-      onChange={(e) => setValue(e.target.value)}
-      onBlur={onBlur}
-      className="w-full h-full border-none focus:outline-none bg-transparent px-1 py-0"
-    />
+    <div className="relative w-full h-full" id={cellId}>
+      <input
+        value={value as string}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={onBlur}
+        className="w-full h-full border-none focus:outline-none bg-transparent px-1 py-0"
+      />
+      {/* Add comment bubble to show existing comments */}
+      <div className="absolute right-0 top-0">
+        <VeltCommentBubble targetElementId={cellId} />
+      </div>
+    </div>
   );
 }
 
@@ -188,6 +198,9 @@ export default function Page() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-white text-xs">
+      {/* Add VeltComments wrapper with popover mode */}
+      <VeltComments popoverMode={true} />
+
       {/* Header component */}
       <Header
         type="sheets"
@@ -197,6 +210,11 @@ export default function Page() {
         setFilename={setFilename}
         handleTitleFocus={handleTitleFocus}
       />
+
+      {/* Add a global comment tool in the header area */}
+      <div className="flex justify-end px-4 py-1 bg-gray-50 border-b border-gray-200">
+        <VeltCommentTool />
+      </div>
 
       {/* Header row with column labels */}
       <div className="flex border-b border-gray-200 sticky top-0 bg-gray-100 z-10">
@@ -230,6 +248,8 @@ export default function Page() {
               <div
                 key={row.id}
                 className="h-6 border-b border-r border-gray-200 flex items-center justify-center text-gray-500"
+                id={`row-${i}`}
+                data-velt-target-comment-element-id={`row-${i}`}
               >
                 {table.getState().pagination.pageIndex *
                   table.getState().pagination.pageSize +
@@ -241,7 +261,12 @@ export default function Page() {
           <div className="flex-1 overflow-x-auto">
             <div>
               {table.getRowModel().rows.map((row) => (
-                <div key={row.id} className="flex border-b border-gray-200">
+                <div
+                  key={row.id}
+                  className="flex border-b border-gray-200"
+                  id={`row-${row.id}`}
+                  data-velt-target-comment-element-id={`row-${row.id}`}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <div
                       key={cell.id}
