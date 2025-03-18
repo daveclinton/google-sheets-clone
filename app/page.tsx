@@ -14,6 +14,7 @@ import { sampleFiles } from "@/lib/sheetData";
 import FiltersBar from "./features/filters-bar";
 import FilesSection from "./features/files-section";
 import Header from "./features/header";
+import { useSetDocument } from "@veltdev/react";
 
 export default function GoogleSheetsUI() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,6 +69,8 @@ export default function GoogleSheetsUI() {
       earlier: filteredFiles.filter((f) => new Date(f.date) < weekAgo),
     };
   }, [filteredFiles]);
+
+  useSetDocument("All Documents View", { documentName: "general" });
 
   const renderActions = (file: (typeof sampleFiles)[0]) => (
     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

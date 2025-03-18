@@ -86,8 +86,6 @@ function EditableCell<TData extends Record<string, Cell>>({
 }) {
   const initialValue = (getValue() as Cell)?.value || "";
   const [value, setValue] = React.useState(initialValue);
-
-  // Create unique cell ID for targeting with Velt comments
   const cellId = `cell-${row.index}-${column.id}`;
 
   const onBlur = () => {
@@ -106,10 +104,7 @@ function EditableCell<TData extends Record<string, Cell>>({
         onBlur={onBlur}
         className="w-full h-full border-none focus:outline-none bg-transparent px-1 py-0"
       />
-      {/* Add comment bubble to show existing comments */}
-      <div className="absolute right-0 top-0">
-        <VeltCommentBubble targetElementId={cellId} />
-      </div>
+      <VeltCommentBubble targetElementId={cellId} />
     </div>
   );
 }
@@ -147,7 +142,6 @@ export default function Page() {
     });
   }, []);
 
-  // Generate empty data
   const [data, setData] = React.useState(() =>
     makeEmptyData(DEFAULT_ROWS_COUNT, COLUMNS_COUNT)
   );
@@ -192,16 +186,13 @@ export default function Page() {
   useSetDocument(params?.id as string, { documentName: filename });
 
   const handleTitleFocus = () => {
-    // Add your title focus handling logic here if needed
     inputRef.current?.focus();
   };
 
   return (
     <div className="h-screen w-screen flex flex-col bg-white text-xs">
-      {/* Add VeltComments wrapper with popover mode */}
       <VeltComments popoverMode={true} />
 
-      {/* Header component */}
       <Header
         type="sheets"
         measureRef={measureRef}
@@ -211,12 +202,10 @@ export default function Page() {
         handleTitleFocus={handleTitleFocus}
       />
 
-      {/* Add a global comment tool in the header area */}
       <div className="flex justify-end px-4 py-1 bg-gray-50 border-b border-gray-200">
         <VeltCommentTool />
       </div>
 
-      {/* Header row with column labels */}
       <div className="flex border-b border-gray-200 sticky top-0 bg-gray-100 z-10">
         <div className="w-10 flex items-center justify-center border-r border-gray-200 bg-gray-100 text-gray-500">
           #
@@ -240,7 +229,6 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Table body */}
       <div className="flex-1 overflow-auto" ref={gridRef}>
         <div className="flex">
           <div className="w-10 sticky left-0 bg-gray-100 z-10">
@@ -248,8 +236,6 @@ export default function Page() {
               <div
                 key={row.id}
                 className="h-6 border-b border-r border-gray-200 flex items-center justify-center text-gray-500"
-                id={`row-${i}`}
-                data-velt-target-comment-element-id={`row-${i}`}
               >
                 {table.getState().pagination.pageIndex *
                   table.getState().pagination.pageSize +
@@ -261,12 +247,7 @@ export default function Page() {
           <div className="flex-1 overflow-x-auto">
             <div>
               {table.getRowModel().rows.map((row) => (
-                <div
-                  key={row.id}
-                  className="flex border-b border-gray-200"
-                  id={`row-${row.id}`}
-                  data-velt-target-comment-element-id={`row-${row.id}`}
-                >
+                <div key={row.id} className="flex border-b border-gray-200">
                   {row.getVisibleCells().map((cell) => (
                     <div
                       key={cell.id}
@@ -287,7 +268,6 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Pagination controls */}
       <div className="border-t border-gray-200 py-2 px-4 flex items-center justify-between bg-gray-50">
         <div className="flex items-center gap-2">
           <button
