@@ -76,11 +76,11 @@ export type Cell = {
   value: string;
 };
 
-const getColumnLabel = (index: number): string => {
+export const getColumnLabel = (index: number): string => {
   return String.fromCharCode(65 + index);
 };
 
-const range = (len: number) => {
+export const range = (len: number) => {
   const arr: number[] = [];
   for (let i = 0; i < len; i++) {
     arr.push(i);

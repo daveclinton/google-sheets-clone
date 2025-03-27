@@ -21,24 +21,13 @@ import {
 } from "@veltdev/react";
 import { Cell, useSkipper } from "@/lib/hooks";
 import { debounce } from "lodash";
+import { getColumnLabel, range } from "@/lib/sheetData";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     updateData: (rowIndex: number, columnId: string, value: Cell) => void;
   }
 }
-
-const getColumnLabel = (index: number): string => {
-  return String.fromCharCode(65 + index);
-};
-
-const range = (len: number) => {
-  const arr: number[] = [];
-  for (let i = 0; i < len; i++) {
-    arr.push(i);
-  }
-  return arr;
-};
 
 function EditableCell<TData extends Record<string, Cell>>({
   getValue,
