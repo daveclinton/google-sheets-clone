@@ -1,12 +1,32 @@
+// Header component
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-
 import { useVeltClient, VeltPresence } from "@veltdev/react";
-
 import Link from "next/link";
 import React, { Ref, useEffect } from "react";
-import { useUserStore } from "@/store/user-store";
+import { User, useUserStore } from "@/store/user-store";
+
+const staticUsers: User[] = [
+  {
+    uid: "user001",
+    displayName: "Alice",
+    email: "alice@example.com",
+    photoURL: "https://picsum.photos/seed/user001/200/300",
+    organizationId: "org-user001",
+    colorCode: "#4CAF50",
+    textColor: "#ffffff",
+  },
+  {
+    uid: "user002",
+    displayName: "Bob",
+    email: "bob@example.com",
+    photoURL: "https://picsum.photos/seed/user002/200/300",
+    organizationId: "org-user002",
+    colorCode: "#2196F3",
+    textColor: "#ffffff",
+  },
+];
 
 interface HeaderProps {
   type: "main" | "sheets";
@@ -29,37 +49,35 @@ const Header: React.FC<HeaderProps> = ({
   searchQuery,
   setSearchQuery,
 }) => {
-  const { user, login, logout, generateRandomUser } = useUserStore();
+  const { user, availableUsers, login } = useUserStore();
   const { client } = useVeltClient();
 
   useEffect(() => {
     if (typeof window !== "undefined" && !user) {
       const storedUser = localStorage.getItem("user-storage");
       if (!storedUser) {
-        login(generateRandomUser());
+        login(staticUsers[0]); // Default to first user
       }
     }
-  }, [user, login, generateRandomUser]);
-
-  // Regular login function
-  const loginDummyUser = () => {
-    login(generateRandomUser());
-  };
+  }, [user, login]);
 
   useEffect(() => {
     if (!client || !user) return;
     const veltUser = {
       userId: user.uid,
-      organizationId: "org-user007",
+      organizationId: user.organizationId,
       name: user.displayName,
       email: user.email,
       photoUrl: user.photoURL,
       color: user.colorCode,
       textColor: user.textColor,
     };
-
     client.identify(veltUser);
   }, [client, user]);
+
+  const handleUserSwitch = (selectedUser: User) => {
+    login(selectedUser);
+  };
 
   return (
     <header
@@ -133,30 +151,28 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      <div className="flex items-center ml-4 gap-4">
+      <div className="flex items-center ml-4 gap-2">
         <VeltPresence />
-        {user ? (
-          <>
-            <span className="text-gray-700 font-medium">
-              {user.displayName}
-            </span>
+        <div className="flex items-center gap-2">
+          {availableUsers.map((availableUser) => (
             <Button
-              variant="ghost"
-              onClick={logout}
-              className="text-gray-600 hover:bg-gray-100"
+              key={availableUser.uid}
+              variant={user?.uid === availableUser.uid ? "default" : "outline"}
+              onClick={() => handleUserSwitch(availableUser)}
+              className={`flex items-center gap-2 ${
+                user?.uid === availableUser.uid
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
-              Change User
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: availableUser.colorCode }}
+              />
+              {availableUser.displayName}
             </Button>
-          </>
-        ) : (
-          <Button
-            variant="ghost"
-            onClick={loginDummyUser}
-            className="text-gray-600 hover:bg-gray-100"
-          >
-            Login
-          </Button>
-        )}
+          ))}
+        </div>
       </div>
     </header>
   );
