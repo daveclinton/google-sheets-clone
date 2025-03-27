@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
@@ -20,11 +19,14 @@ import {
   VeltCommentBubble,
   useSetDocument,
 } from "@veltdev/react";
+import { Cell, useSkipper } from "@/lib/hooks";
 import { debounce } from "lodash";
 
-export type Cell = {
-  value: string;
-};
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    updateData: (rowIndex: number, columnId: string, value: Cell) => void;
+  }
+}
 
 const getColumnLabel = (index: number): string => {
   return String.fromCharCode(65 + index);
@@ -37,27 +39,6 @@ const range = (len: number) => {
   }
   return arr;
 };
-
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends RowData> {
-    updateData: (rowIndex: number, columnId: string, value: Cell) => void;
-  }
-}
-
-function useSkipper() {
-  const shouldSkipRef = React.useRef(true);
-  const shouldSkip = shouldSkipRef.current;
-
-  const skip = React.useCallback(() => {
-    shouldSkipRef.current = false;
-  }, []);
-
-  React.useEffect(() => {
-    shouldSkipRef.current = true;
-  });
-
-  return [shouldSkip, skip] as const;
-}
 
 function EditableCell<TData extends Record<string, Cell>>({
   getValue,
@@ -72,11 +53,15 @@ function EditableCell<TData extends Record<string, Cell>>({
 }) {
   const initialValue = (getValue() as Cell)?.value || "";
   const [value, setValue] = React.useState(initialValue);
-  const [isActive, setIsActive] = React.useState(false); // New state
+  const [isActive, setIsActive] = React.useState(false);
   const cellId = `cell-${row.index}-${column.id}`;
 
   const onBlur = () => {
-    table.options.meta?.updateData(row.index, column.id, { value });
+    table.options.meta?.updateData(
+      row.index,
+      column.id,
+      value as unknown as Cell
+    );
     setIsActive(false);
   };
 
@@ -104,7 +89,7 @@ export function SpreadsheetPage({
   initialTitle,
 }: {
   id: string;
-  initialData: any[];
+  initialData: Record<string, Cell>[];
   initialTitle: string;
 }) {
   const COLUMNS_COUNT = 10;
@@ -171,6 +156,9 @@ export function SpreadsheetPage({
     meta: {
       updateData,
     },
+    debugTable: true,
+    debugHeaders: true,
+    debugColumns: true,
   });
 
   useEffect(() => {

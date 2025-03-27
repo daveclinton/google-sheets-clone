@@ -72,3 +72,70 @@ export const sampleFiles = [
     type: "sheets",
   },
 ];
+export type Cell = {
+  value: string;
+};
+
+const getColumnLabel = (index: number): string => {
+  return String.fromCharCode(65 + index);
+};
+
+const range = (len: number) => {
+  const arr: number[] = [];
+  for (let i = 0; i < len; i++) {
+    arr.push(i);
+  }
+  return arr;
+};
+
+const sampleNames = [
+  "Alice",
+  "Bob",
+  "Charlie",
+  "Diana",
+  "Eve",
+  "Frank",
+  "Grace",
+];
+const sampleCategories = ["Sales", "Marketing", "Support", "Dev", "HR"];
+const sampleDates = () =>
+  new Date(
+    2024,
+    Math.floor(Math.random() * 12),
+    Math.floor(Math.random() * 28) + 1
+  )
+    .toISOString()
+    .split("T")[0];
+const sampleNumber = () => Math.floor(Math.random() * 1000).toString();
+
+export function makeSampleData(rows: number, cols: number) {
+  return range(rows).map((rowIndex) => {
+    const rowData: Record<string, Cell> = {};
+    for (let i = 0; i < cols; i++) {
+      const columnLabel = getColumnLabel(i);
+      let value: string;
+
+      // Assign meaningful data based on column
+      switch (columnLabel) {
+        case "A": // Names
+          value = sampleNames[rowIndex % sampleNames.length];
+          break;
+        case "B": // Categories
+          value = sampleCategories[rowIndex % sampleCategories.length];
+          break;
+        case "C": // Dates
+          value = sampleDates();
+          break;
+        case "D": // Numbers (e.g., sales amount)
+          value = sampleNumber();
+          break;
+        default: // Random text or numbers for other columns
+          value = i % 2 === 0 ? sampleNumber() : `Item ${rowIndex + 1}-${i}`;
+          break;
+      }
+
+      rowData[columnLabel] = { value };
+    }
+    return rowData;
+  });
+}
