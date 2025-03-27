@@ -19,9 +19,9 @@ import {
   VeltCommentBubble,
   useSetDocument,
 } from "@veltdev/react";
-import { Cell, useSkipper } from "@/lib/hooks";
+import { useSkipper } from "@/lib/hooks";
 import { debounce } from "lodash";
-import { getColumnLabel, range } from "@/lib/sheetData";
+import { Cell, getColumnLabel, range } from "@/lib/sheetData";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {

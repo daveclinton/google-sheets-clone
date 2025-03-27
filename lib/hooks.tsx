@@ -14,7 +14,3 @@ export function useSkipper() {
 
   return [shouldSkip, skip] as const;
 }
-
-export type Cell = {
-  value: string;
-};
